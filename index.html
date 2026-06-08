@@ -3,137 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>오늘의 명언집</title>
+    <title>나만의 명언집</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Noto Sans KR', sans-serif;
-            /* 초기 배경 스타일 */
             background: linear-gradient(135deg, #74abe2, #5563c1);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             color: #333;
-            transition: background 0.5s ease; /* 배경 바뀔 때 부드럽게 애니메이션 */
+            padding: 20px;
         }
+        /* 메인 명언 카드 */
         .card {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 35px;
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            width: 90%;
+            width: 100%;
             max-width: 550px;
             text-align: center;
             backdrop-filter: blur(10px);
+            margin-bottom: 20px;
         }
         .quote {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 500;
             line-height: 1.6;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             word-break: keep-all;
         }
-        .quote::before { content: "“ "; color: #5563c1; font-size: 2rem; }
-        .quote::after { content: " ”"; color: #5563c1; font-size: 2rem; }
+        .quote::before { content: "“ "; color: #5563c1; font-size: 1.8rem; }
+        .quote::after { content: " ”"; color: #5563c1; font-size: 1.8rem; }
         
         .author {
             font-size: 1.1rem;
             color: #666;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             font-style: italic;
+        }
+        /* 입력 폼 스타일 */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 25px;
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .input-group input {
+            padding: 10px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #5563c1;
         }
         /* 버튼 레이아웃 */
         .btn-group {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
         }
         .btn {
             background: #5563c1;
             color: white;
             border: none;
-            padding: 12px 24px;
-            font-size: 1rem;
+            padding: 10px 20px;
+            font-size: 0.95rem;
             border-radius: 30px;
             cursor: pointer;
             transition: 0.2s;
-            box-shadow: 0 4px 10px rgba(85, 99, 193, 0.3);
         }
         .btn:hover { background: #4350a5; }
-        /* 복사 버튼은 다른 색상으로 포인트 */
-        .btn-secondary {
-            background: #4a5568;
-            box-shadow: 0 4px 10px rgba(74, 85, 104, 0.3);
-        }
+        .btn-secondary { background: #4a5568; }
         .btn-secondary:hover { background: #2d3748; }
+        .btn-add { background: #2b6cb0; }
+        .btn-add:hover { background: #2c5282; }
+
+        /* 명언 리스트 스타일 (알아서 정리해 주는 영역) */
+        .list-container {
+            background: rgba(255, 255, 255, 0.9);
+            width: 100%;
+            max-width: 550px;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-height: 250px;
+            overflow-y: auto; /* 많아지면 스크롤바 생김 */
+        }
+        .list-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #4a5568;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 5px;
+        }
+        .quote-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #edf2f7;
+            font-size: 0.9rem;
+        }
+        .quote-item-text {
+            max-width: 85%;
+            word-break: break-all;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #e53e3e;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 0 5px;
+        }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <div class="quote" id="quote">로딩 중...</div>
+        <div class="quote" id="quote">명언을 등록하거나 아래 버튼을 눌러보세요!</div>
         <div class="author" id="author"></div>
+        
+        <div class="input-group">
+            <input type="text" id="inputQuote" placeholder="기억하고 싶은 명언을 적으세요">
+            <input type="text" id="inputAuthor" placeholder="저자 또는 출처 (비워두면 '익명')">
+            <button class="btn btn-add" onclick="addQuote()">내가 적은 명언 추가하기</button>
+        </div>
+
         <div class="btn-group">
             <button class="btn" onclick="nextEverything()">다른 명언 보기</button>
             <button class="btn btn-secondary" onclick="copyQuote()">문구 복사</button>
         </div>
     </div>
 
+    <div class="list-container">
+        <div class="list-title">저장된 명언 목록 (최신순)</div>
+        <div id="quoteList"></div>
+    </div>
+
     <script>
-        const quotes = [
+        // 기본 초기 명언 데이터
+        const defaultQuotes = [
             { text: "삶이 있는 한 희망은 있다.", author: "키케로" },
             { text: "산다는 것 그것은 치열한 전투이다.", author: "로망 로랑" },
             { text: "언제나 현재에 집중할 수 있다면 행복할 것이다.", author: "파울로 코엘료" },
-            { text: "피할 수 없으면 즐겨라.", author: "로버트 엘리엇" },
-            { text: "행복은 습관이다, 그것을 몸에 지녀라.", author: "허버트 본" },
-            { text: "내일은 내일의 태양이 뜬다.", author: "마가렛 미첼" }
+            { text: "피할 수 없으면 즐겨라.", author: "로버트 엘리엇" }
         ];
 
-        // 감성적인 그라데이션 색상 모음
+        // 감성 배경색 모음
         const backgrounds = [
             "linear-gradient(135deg, #74abe2, #5563c1)",
             "linear-gradient(135deg, #a1c4fd, #c2e9fb)",
             "linear-gradient(135deg, #ff9a9e, #fecfef)",
-            "linear-gradient(135deg, #f5f7fa, #b8c6db)",
-            "linear-gradient(135deg, #84fab0, #8fd3f4)",
-            "linear-gradient(135deg, #a8edda, #fed6e3)"
+            "linear-gradient(135deg, #84fab0, #8fd3f4)"
         ];
 
-        // 1. 랜덤 명언 출력 함수
-        function randomQuote() {
-            const randomIndex = Math.floor(Math.random() * quotes.length);
-            document.getElementById('quote').innerText = quotes[randomIndex].text;
-            document.getElementById('author').innerText = `- ${quotes[randomIndex].author}`;
+        let myQuotes = [];
+
+        // 로컬스토리지에서 데이터를 불러오는 함수
+        function loadQuotes() {
+            const saved = localStorage.getItem('myQuotes');
+            if (saved) {
+                myQuotes = JSON.parse(saved);
+            } else {
+                myQuotes = [...defaultQuotes];
+                localStorage.setItem('myQuotes', JSON.stringify(myQuotes));
+            }
+            renderList();
         }
 
-        // 2. 랜덤 배경 변경 함수
-        function randomBg() {
-            const randomIndex = Math.floor(Math.random() * backgrounds.length);
-            document.body.style.background = backgrounds[randomIndex];
+        // 1. 명언 추가 함수
+        function addQuote() {
+            const qInput = document.getElementById('inputQuote');
+            const aInput = document.getElementById('inputAuthor');
+
+            if (!qInput.value.trim()) {
+                alert("명언 내용을 입력해주세요!");
+                return;
+            }
+
+            const newQuote = {
+                text: qInput.value.trim(),
+                author: aInput.value.trim() || "익명"
+            };
+
+            // 배열 맨 앞에 추가 (최신순 정리)
+            myQuotes.unshift(newQuote);
+            localStorage.setItem('myQuotes', JSON.stringify(myQuotes));
+
+            // 현재 화면에도 방금 쓴 명언 보여주기
+            document.getElementById('quote').innerText = newQuote.text;
+            document.getElementById('author').innerText = `- ${newQuote.author}`;
+
+            // 입력창 비우기 및 리스트 새로고침
+            qInput.value = "";
+            aInput.value = "";
+            renderList();
+            alert("명언이 성공적으로 추가되어 아래 리스트에 정리되었습니다!");
         }
 
-        // 버튼 누르면 명언과 배경이 동시에 바뀌도록 묶어줌
-        function nextEverything() {
-            randomQuote();
-            randomBg();
+        // 2. 명언 삭제 함수
+        function deleteQuote(index) {
+            if(confirm("이 명언을 삭제하시겠습니까?")) {
+                myQuotes.splice(index, 1);
+                localStorage.setItem('myQuotes', JSON.stringify(myQuotes));
+                renderList();
+                nextEverything();
+            }
         }
 
-        // 3. 클립보드 복사 기능
-        function copyQuote() {
-            const quoteText = document.getElementById('quote').innerText;
-            const authorText = document.getElementById('author').innerText;
-            const fullText = `${quoteText} ${authorText}`;
+        // 3. 아래쪽에 리스트 깔끔하게 그려주는 함수 (정리 정돈)
+        function renderList() {
+            const listDiv = document.getElementById('quoteList');
+            listDiv.innerHTML = "";
 
-            navigator.clipboard.writeText(fullText).then(() => {
-                alert("명언이 복사되었습니다! 필요한 곳에 붙여넣으세요.");
-            }).catch(err => {
-                alert("복사에 실패했습니다 다시 시도해주세요.");
+            if (myQuotes.length === 0) {
+                listDiv.innerHTML = "<div style='color:#999; text-align:center; padding:10px;'>저장된 명언이 없습니다.</div>";
+                return;
+            }
+
+            myQuotes.forEach((q, index) => {
+                const item = document.createElement('div');
+                item.className = 'quote-item';
+                item.innerHTML = `
+                    <span class="quote-item-text"><strong>"${q.text}"</strong> - ${q.author}</span>
+                    <button class="delete-btn" onclick="deleteQuote(${index})">×</button>
+                `;
+                listDiv.appendChild(item);
             });
         }
 
-        // 처음 켤 때 실행
-        window.onload = nextEverything;
+        // 4. 랜덤 노출 및 배경 변경
+        function nextEverything() {
+            if (myQuotes.length === 0) {
+                document.getElementById('quote').innerText = "등록된 명언이 없습니다. 새로 적어보세요!";
+                document.getElementById('author').innerText = "";
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * myQuotes.length);
+            document.getElementById('quote').innerText = myQuotes[randomIndex].text;
+            document.getElementById('author').innerText = `- ${myQuotes[randomIndex].author}`;
+            
+            const randomBgIndex = Math.floor(Math.random() * backgrounds.length);
+            document.body.style.background = backgrounds[randomBgIndex];
+        }
+
+        // 5. 복사 기능
+        function copyQuote() {
+            const quoteText = document.getElementById('quote').innerText;
+            const authorText = document.getElementById('author').innerText;
+            if(authorText === "") { alert("복사할 내용이 없습니다."); return; }
+            
+            navigator.clipboard.writeText(`${quoteText} ${authorText}`).then(() => {
+                alert("현재 화면의 명언이 복사되었습니다!");
+            });
+        }
+
+        // 페이지 시작할 때 데이터 로드
+        window.onload = function() {
+            loadQuotes();
+            nextEverything();
+        };
     </script>
 </body>
 </html>
