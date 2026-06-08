@@ -7,7 +7,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* 화면 전체를 터치 영역으로 만듦 */
         body {
             font-family: 'Noto Sans KR', sans-serif;
             background: linear-gradient(135deg, #74abe2, #5563c1);
@@ -18,12 +17,12 @@
             align-items: center;
             color: #333;
             padding: 20px;
-            cursor: pointer; /* 터치 가능하다는 표시 */
+            cursor: pointer;
             transition: background 0.5s ease;
-            user-select: none; /* 텍스트 드래그 방지 */
+            user-select: none;
         }
 
-        /* 메인 명언 카드 (더 투명하고 트렌디하게) */
+        /* 메인 카드 */
         .card {
             background: rgba(255, 255, 255, 0.85);
             padding: 45px 30px;
@@ -36,11 +35,8 @@
             position: relative;
             transition: transform 0.2s ease;
         }
-        .card:active {
-            transform: scale(0.99); /* 터치했을 때 살짝 들어가는 효과 */
-        }
+        .card:active { transform: scale(0.99); }
 
-        /* 상단 하트 아이콘 */
         .favorite-toggle-btn {
             position: absolute;
             top: 22px; right: 22px;
@@ -50,48 +46,40 @@
         }
 
         .quote {
-            font-size: 1.4rem;
-            font-weight: 500;
-            line-height: 1.65;
-            margin: 15px 0;
-            word-break: keep-all;
+            font-size: 1.4rem; font-weight: 500; line-height: 1.65;
+            margin: 15px 0; word-break: keep-all;
         }
         .quote::before { content: "“ "; color: #5563c1; font-size: 1.8rem; }
         .quote::after { content: " ”"; color: #5563c1; font-size: 1.8rem; }
         
-        .author {
-            font-size: 1rem;
-            color: #666;
-            margin-top: 15px;
-            font-style: italic;
-        }
+        .author { font-size: 1rem; color: #666; margin-top: 15px; font-style: italic; }
 
-        /* 💡 하단 고정형 깔끔한 아이콘 메뉴바 */
+        /* 하단 탭바 (버튼이 4개로 늘어나서 max-width를 살짝 키움) */
         .bottom-nav {
             display: flex;
             justify-content: space-around;
             align-items: center;
             background: rgba(255, 255, 255, 0.9);
-            padding: 10px 20px;
+            padding: 10px 10px;
             border-radius: 40px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 320px;
+            max-width: 360px;
             margin-top: 30px;
             backdrop-filter: blur(10px);
         }
         .nav-item {
             background: none; border: none;
             font-size: 1.3rem; cursor: pointer;
-            padding: 10px; border-radius: 50%;
+            padding: 8px; border-radius: 50%;
             transition: 0.2s;
             display: flex; align-items: center; justify-content: center;
         }
         .nav-item:hover { background: #edf2f7; }
-        .nav-label { font-size: 0.75rem; font-weight: 600; color: #4a5568; margin-top: 2px; }
-        .nav-btn-wrapper { display: flex; flex-direction: column; align-items: center; }
+        .nav-label { font-size: 0.7rem; font-weight: 600; color: #4a5568; margin-top: 2px; }
+        .nav-btn-wrapper { display: flex; flex-direction: column; align-items: center; flex: 1; }
 
-        /* 팝업 모달 스타일 */
+        /* 팝업 모달 */
         .modal {
             display: none; position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -101,14 +89,14 @@
         }
         .modal-content {
             background: white; padding: 30px; border-radius: 20px;
-            width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            position: relative; cursor: default; /* 팝업 안에서는 터치 넘김 방지 */
+            width: 100%; max-width: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative; cursor: default;
         }
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: #aaa; }
         .modal-title { font-size: 1.15rem; font-weight: bold; margin-bottom: 20px; text-align: center; }
         
         .input-group { display: flex; flex-direction: column; gap: 12px; }
-        .input-group input { padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; }
+        .input-group input { padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; width: 100%; }
         .input-group input:focus { outline: none; border-color: #5563c1; }
         
         .modal-submit-btn {
@@ -116,11 +104,21 @@
             border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 5px;
         }
 
-        .fav-list { max-height: 220px; overflow-y: auto; }
-        .fav-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #edf2f7; font-size: 0.9rem; }
+        /* 공통 리스트 스타일 (보관함 및 전체목록) */
+        .item-list { max-height: 260px; overflow-y: auto; text-align: left; }
+        .list-row {
+            display: flex; flex-direction: column; gap: 5px;
+            padding: 12px 0; border-bottom: 1px solid #edf2f7; font-size: 0.9rem;
+        }
+        .list-content { word-break: keep-all; line-height: 1.4; }
+        .list-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 5px; }
+        
+        /* 작업 버튼들 */
+        .action-btn { background: none; border: none; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
+        .edit-btn { color: #3182ce; }
+        .del-btn { color: #e53e3e; }
         .remove-fav-btn { background: none; border: none; color: #e53e3e; cursor: pointer; font-size: 1.1rem; }
         
-        /* 가이드 텍스트 */
         .tip { font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-top: 15px; }
     </style>
 </head>
@@ -144,6 +142,10 @@
             <span class="nav-label">추가</span>
         </div>
         <div class="nav-btn-wrapper">
+            <button class="nav-item" onclick="openModal('listModal')">📋</button>
+            <span class="nav-label">전체목록</span>
+        </div>
+        <div class="nav-btn-wrapper">
             <button class="nav-item" onclick="openModal('favModal')">📂</button>
             <span class="nav-label">보관함</span>
         </div>
@@ -152,12 +154,20 @@
     <div id="addModal" class="modal" onclick="closeModal('addModal')">
         <div class="modal-content" onclick="event.stopPropagation()">
             <span class="close-modal" onclick="closeModal('addModal')">&times;</span>
-            <div class="modal-title">📝 새 명언 등록</div>
+            <div class="modal-title" id="modalTitle">📝 새 명언 등록</div>
             <div class="input-group">
                 <input type="text" id="inputQuote" placeholder="기억하고 싶은 명언을 적으세요">
                 <input type="text" id="inputAuthor" placeholder="저자 또는 출처 (비워두면 '익명')">
-                <button class="modal-submit-btn" onclick="addQuote()">등록하기</button>
+                <button class="modal-submit-btn" id="submitBtn" onclick="addQuote()">등록하기</button>
             </div>
+        </div>
+    </div>
+
+    <div id="listModal" class="modal" onclick="closeModal('listModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-modal" onclick="closeModal('listModal')">&times;</span>
+            <div class="modal-title">📋 등록된 모든 명언 관리</div>
+            <div class="item-list" id="allQuotesList"></div>
         </div>
     </div>
 
@@ -165,7 +175,7 @@
         <div class="modal-content" onclick="event.stopPropagation()">
             <span class="close-modal" onclick="closeModal('favModal')">&times;</span>
             <div class="modal-title">❤️ 내가 즐겨찾기한 명언</div>
-            <div class="fav-list" id="favList"></div>
+            <div class="item-list" id="favList"></div>
         </div>
     </div>
 
@@ -186,6 +196,7 @@
         ];
 
         let allQuotes = []; let favoriteQuotes = []; let currentQuote = null;
+        let editIndex = -1; // 수정 중인 명언의 인덱스 보관용 (-1이면 신규 등록)
 
         function initData() {
             const savedAll = localStorage.getItem('allQuotes');
@@ -198,28 +209,112 @@
 
         function openModal(id) {
             document.getElementById(id).style.display = 'flex';
+            if(id === 'addModal' && editIndex === -1) {
+                // 신규 등록 모드로 초기화
+                document.getElementById('modalTitle').innerText = "📝 새 명언 등록";
+                document.getElementById('submitBtn').innerText = "등록하기";
+                document.getElementById('inputQuote').value = "";
+                document.getElementById('inputAuthor').value = "";
+            }
+            if(id === 'listModal') renderAllQuotes();
             if(id === 'favModal') renderFavorites();
         }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
+        function closeModal(id) { 
+            document.getElementById(id).style.display = 'none'; 
+            if(id === 'addModal') editIndex = -1; // 수정 취소 시 초기화
+        }
 
+        // 명언 등록 또는 수정 처리
         function addQuote() {
             const qInput = document.getElementById('inputQuote');
             const aInput = document.getElementById('inputAuthor');
             if (!qInput.value.trim()) { alert("명언 내용을 입력해주세요!"); return; }
 
-            const newQuote = { text: qInput.value.trim(), author: aInput.value.trim() || "익명" };
-            allQuotes.unshift(newQuote);
-            localStorage.setItem('allQuotes', JSON.stringify(allQuotes));
+            const quoteData = { text: qInput.value.trim(), author: aInput.value.trim() || "익명" };
 
-            currentQuote = newQuote;
-            document.getElementById('quote').innerText = newQuote.text;
-            document.getElementById('author').innerText = `- ${newQuote.author}`;
+            if (editIndex > -1) {
+                // 📝 수정 모드일 때
+                // 즐겨찾기 연동 수정 (텍스트 기준 매칭)
+                const favIdx = favoriteQuotes.findIndex(q => q.text === allQuotes[editIndex].text);
+                if(favIdx > -1) favoriteQuotes[favIdx] = quoteData;
+
+                allQuotes[editIndex] = quoteData;
+                editIndex = -1; // 초기화
+                alert("명언이 수정되었습니다!");
+            } else {
+                // ➕ 신규 추가 모드일 때
+                allQuotes.unshift(quoteData);
+                alert("새로운 명언이 등록되었습니다!");
+            }
+
+            localStorage.setItem('allQuotes', JSON.stringify(allQuotes));
+            localStorage.setItem('favoriteQuotes', JSON.stringify(favoriteQuotes));
+
+            // 현재 메인 화면 갱신
+            currentQuote = quoteData;
+            document.getElementById('quote').innerText = quoteData.text;
+            document.getElementById('author').innerText = `- ${quoteData.author}`;
             checkHeartStatus();
 
             qInput.value = ""; aInput.value = "";
             closeModal('addModal');
         }
 
+        // 전체 목록에서 [수정]을 눌렀을 때 처리
+        function startEdit(index) {
+            editIndex = index;
+            closeModal('listModal');
+            
+            // 입력 폼 열기 및 데이터 세팅
+            openModal('addModal');
+            document.getElementById('modalTitle').innerText = "✏️ 명언 수정하기";
+            document.getElementById('submitBtn').innerText = "수정 완료";
+            document.getElementById('inputQuote').value = allQuotes[index].text;
+            document.getElementById('inputAuthor').value = allQuotes[index].author;
+        }
+
+        // 전체 목록에서 [삭제]를 눌렀을 때 처리
+        function deleteQuote(index) {
+            if(confirm("이 명언을 영구 삭제하시겠습니까?")) {
+                // 즐겨찾기에서도 같이 삭제 처리
+                const favIdx = favoriteQuotes.findIndex(q => q.text === allQuotes[index].text);
+                if(favIdx > -1) favoriteQuotes.splice(favIdx, 1);
+
+                allQuotes.splice(index, 1);
+                localStorage.setItem('allQuotes', JSON.stringify(allQuotes));
+                localStorage.setItem('favoriteQuotes', JSON.stringify(favoriteQuotes));
+                
+                renderAllQuotes();
+                nextEverything();
+            }
+        }
+
+        // 전체 목록 리스트 그리기
+        function renderAllQuotes() {
+            const listDiv = document.getElementById('allQuotesList');
+            listDiv.innerHTML = "";
+
+            if(allQuotes.length === 0) {
+                listDiv.innerHTML = "<div style='color:#999; text-align:center; padding:20px;'>등록된 명언이 없습니다.</div>";
+                return;
+            }
+
+            allQuotes.forEach((q, index) => {
+                const row = document.createElement('div');
+                row.className = 'list-row';
+                row.innerHTML = `
+                    <div class="list-content">"${q.text}" <strong>-${q.author}</strong></div>
+                    <div class="list-actions">
+                        <button class="action-btn edit-btn" onclick="startEdit(${index})">수정</button>
+                        <button class="action-btn del-btn" onclick="deleteQuote(${index})">삭제</button>
+                    </div>
+                `;
+                listDiv.appendChild(row);
+            });
+        }
+
+        // 즐겨찾기 관련 토글 및 체크
         function toggleFavorite() {
             if(!currentQuote) return;
             const index = favoriteQuotes.findIndex(q => q.text === currentQuote.text);
@@ -246,7 +341,10 @@
 
             favoriteQuotes.forEach((q, index) => {
                 const item = document.createElement('div');
-                item.className = 'fav-item';
+                item.className = 'list-row';
+                item.style.flexDirection = 'row';
+                item.style.justifyContent = 'space-between';
+                item.style.alignItems = 'center';
                 item.innerHTML = `
                     <span style="max-width:85%; word-break:keep-all;">"${q.text}" <strong>-${q.author}</strong></span>
                     <button class="remove-fav-btn" onclick="removeFavorite(${index}); event.stopPropagation();">×</button>
