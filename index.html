@@ -6,176 +6,163 @@
     <title>나만의 명언집</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* 화면 전체를 터치 영역으로 만듦 */
         body {
             font-family: 'Noto Sans KR', sans-serif;
             background: linear-gradient(135deg, #74abe2, #5563c1);
             height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             color: #333;
-            overflow: hidden;
             padding: 20px;
+            cursor: pointer; /* 터치 가능하다는 표시 */
+            transition: background 0.5s ease;
+            user-select: none; /* 텍스트 드래그 방지 */
         }
-        /* 메인 명언 카드 */
+
+        /* 메인 명언 카드 (더 투명하고 트렌디하게) */
         .card {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.85);
+            padding: 45px 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
             width: 100%;
-            max-width: 500px;
+            max-width: 420px;
             text-align: center;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
             position: relative;
+            transition: transform 0.2s ease;
         }
-        /* 즐겨찾기(하트) 표시 버튼 */
+        .card:active {
+            transform: scale(0.99); /* 터치했을 때 살짝 들어가는 효과 */
+        }
+
+        /* 상단 하트 아이콘 */
         .favorite-toggle-btn {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: transform 0.2s;
+            top: 22px; right: 22px;
+            background: none; border: none;
+            font-size: 1.6rem; cursor: pointer;
+            z-index: 10;
         }
-        .favorite-toggle-btn:scale(1.1);
 
         .quote {
-            font-size: 1.45rem;
+            font-size: 1.4rem;
             font-weight: 500;
-            line-height: 1.6;
-            margin: 20px 0 15px 0;
+            line-height: 1.65;
+            margin: 15px 0;
             word-break: keep-all;
         }
         .quote::before { content: "“ "; color: #5563c1; font-size: 1.8rem; }
         .quote::after { content: " ”"; color: #5563c1; font-size: 1.8rem; }
         
         .author {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #666;
-            margin-bottom: 30px;
+            margin-top: 15px;
             font-style: italic;
         }
-        /* 버튼 레이아웃 */
-        .btn-group {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .btn {
-            background: #5563c1;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 0.95rem;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 4px 10px rgba(85, 99, 193, 0.2);
-        }
-        .btn:hover { background: #4350a5; }
-        .btn-secondary { background: #4a5568; box-shadow: 0 4px 10px rgba(74, 85, 104, 0.2); }
-        .btn-secondary:hover { background: #2d3748; }
-        .btn-accent { background: #2b6cb0; }
-        .btn-accent:hover { background: #2c5282; }
 
-        /* 팝업 창 (모달) 스타일 - 추가하기 / 즐겨찾기 공용 */
-        .modal {
-            display: none; /* 평소에는 숨김 */
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
+        /* 💡 하단 고정형 깔끔한 아이콘 메뉴바 */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
             align-items: center;
-            z-index: 100;
-            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 40px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 320px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .nav-item {
+            background: none; border: none;
+            font-size: 1.3rem; cursor: pointer;
+            padding: 10px; border-radius: 50%;
+            transition: 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .nav-item:hover { background: #edf2f7; }
+        .nav-label { font-size: 0.75rem; font-weight: 600; color: #4a5568; margin-top: 2px; }
+        .nav-btn-wrapper { display: flex; flex-direction: column; align-items: center; }
+
+        /* 팝업 모달 스타일 */
+        .modal {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            justify-content: center; align-items: center;
+            z-index: 100; padding: 20px;
         }
         .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            position: relative;
+            background: white; padding: 30px; border-radius: 20px;
+            width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative; cursor: default; /* 팝업 안에서는 터치 넘김 방지 */
         }
-        .close-modal {
-            position: absolute;
-            top: 15px; right: 20px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #999;
-        }
-        .modal-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #2d3748;
-            text-align: center;
-        }
-        /* 입력창 스타일 */
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .input-group input {
-            padding: 12px;
-            border: 1px solid #cbd5e0;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: #aaa; }
+        .modal-title { font-size: 1.15rem; font-weight: bold; margin-bottom: 20px; text-align: center; }
+        
+        .input-group { display: flex; flex-direction: column; gap: 12px; }
+        .input-group input { padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem; }
         .input-group input:focus { outline: none; border-color: #5563c1; }
+        
+        .modal-submit-btn {
+            background: #5563c1; color: white; border: none; padding: 12px;
+            border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 5px;
+        }
 
-        /* 즐겨찾기 리스트 스타일 */
-        .fav-list {
-            max-height: 250px;
-            overflow-y: auto;
-        }
-        .fav-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #edf2f7;
-            font-size: 0.95rem;
-        }
-        .fav-item-text { max-width: 85%; word-break: keep-all; }
+        .fav-list { max-height: 220px; overflow-y: auto; }
+        .fav-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #edf2f7; font-size: 0.9rem; }
         .remove-fav-btn { background: none; border: none; color: #e53e3e; cursor: pointer; font-size: 1.1rem; }
+        
+        /* 가이드 텍스트 */
+        .tip { font-size: 0.8rem; color: rgba(255,255,255,0.7); margin-top: 15px; }
     </style>
 </head>
-<body>
+<body onclick="nextEverything()">
 
-    <div class="card">
-        <button class="favorite-toggle-btn" onclick="toggleFavorite()" id="heartBtn">🤍</button>
-        
+    <div class="card" onclick="event.stopPropagation()">
+        <button class="favorite-toggle-btn" onclick="toggleFavorite(); event.stopPropagation();" id="heartBtn">🤍</button>
         <div class="quote" id="quote">로딩 중...</div>
         <div class="author" id="author"></div>
-        
-        <div class="btn-group">
-            <button class="btn" onclick="nextEverything()">다른 명언 보기</button>
-            <button class="btn btn-secondary" onclick="openModal('addModal')">명언 추가하기</button>
-            <button class="btn btn-accent" onclick="openModal('favModal')">즐겨찾기 보기</button>
+    </div>
+
+    <div class="tip">💡 화면 아무 곳이나 터치하면 다음 명언으로 넘어가요!</div>
+
+    <div class="bottom-nav" onclick="event.stopPropagation()">
+        <div class="nav-btn-wrapper">
+            <button class="nav-item" onclick="nextEverything()">🔄</button>
+            <span class="nav-label">넘기기</span>
+        </div>
+        <div class="nav-btn-wrapper">
+            <button class="nav-item" onclick="openModal('addModal')">✍️</button>
+            <span class="nav-label">추가</span>
+        </div>
+        <div class="nav-btn-wrapper">
+            <button class="nav-item" onclick="openModal('favModal')">📂</button>
+            <span class="nav-label">보관함</span>
         </div>
     </div>
 
-    <div id="addModal" class="modal">
-        <div class="modal-content">
+    <div id="addModal" class="modal" onclick="closeModal('addModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
             <span class="close-modal" onclick="closeModal('addModal')">&times;</span>
             <div class="modal-title">📝 새 명언 등록</div>
             <div class="input-group">
                 <input type="text" id="inputQuote" placeholder="기억하고 싶은 명언을 적으세요">
                 <input type="text" id="inputAuthor" placeholder="저자 또는 출처 (비워두면 '익명')">
-                <button class="btn" style="width: 100%; margin-top: 10px;" onclick="addQuote()">내가 적은 명언 추가하기</button>
+                <button class="modal-submit-btn" onclick="addQuote()">등록하기</button>
             </div>
         </div>
     </div>
 
-    <div id="favModal" class="modal">
-        <div class="modal-content">
+    <div id="favModal" class="modal" onclick="closeModal('favModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
             <span class="close-modal" onclick="closeModal('favModal')">&times;</span>
             <div class="modal-title">❤️ 내가 즐겨찾기한 명언</div>
             <div class="fav-list" id="favList"></div>
@@ -183,7 +170,6 @@
     </div>
 
     <script>
-        // 기본 제공 명언
         const defaultQuotes = [
             { text: "삶이 있는 한 희망은 있다.", author: "키케로" },
             { text: "산다는 것 그것은 치열한 전투이다.", author: "로망 로랑" },
@@ -195,104 +181,66 @@
             "linear-gradient(135deg, #74abe2, #5563c1)",
             "linear-gradient(135deg, #a1c4fd, #c2e9fb)",
             "linear-gradient(135deg, #ff9a9e, #fecfef)",
-            "linear-gradient(135deg, #84fab0, #8fd3f4)"
+            "linear-gradient(135deg, #84fab0, #8fd3f4)",
+            "linear-gradient(135deg, #cfd9df, #e2ebf0)"
         ];
 
-        let allQuotes = [];       // 전체 명언 리스트
-        let favoriteQuotes = [];  // 하트 누른 즐겨찾기 리스트
-        let currentQuote = null;  // 현재 화면에 출출된 명언
+        let allQuotes = []; let favoriteQuotes = []; let currentQuote = null;
 
-        // 데이터 초기 로드
         function initData() {
             const savedAll = localStorage.getItem('allQuotes');
             const savedFav = localStorage.getItem('favoriteQuotes');
-
-            if (savedAll) {
-                allQuotes = JSON.parse(savedAll);
-            } else {
-                allQuotes = [...defaultQuotes];
-                localStorage.setItem('allQuotes', JSON.stringify(allQuotes));
-            }
-
-            if (savedFav) {
-                favoriteQuotes = JSON.parse(savedFav);
-            } else {
-                favoriteQuotes = [];
-                localStorage.setItem('favoriteQuotes', JSON.stringify(favoriteQuotes));
-            }
+            allQuotes = savedAll ? JSON.parse(savedAll) : [...defaultQuotes];
+            favoriteQuotes = savedFav ? JSON.parse(savedFav) : [];
+            if(!savedAll) localStorage.setItem('allQuotes', JSON.stringify(allQuotes));
+            if(!savedFav) localStorage.setItem('favoriteQuotes', JSON.stringify(favoriteQuotes));
         }
 
-        // 팝업 열기/닫기
         function openModal(id) {
             document.getElementById(id).style.display = 'flex';
             if(id === 'favModal') renderFavorites();
         }
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        // 새 명언 추가 (작성 후 자동 팝업 닫힘)
         function addQuote() {
             const qInput = document.getElementById('inputQuote');
             const aInput = document.getElementById('inputAuthor');
+            if (!qInput.value.trim()) { alert("명언 내용을 입력해주세요!"); return; }
 
-            if (!qInput.value.trim()) {
-                alert("명언 내용을 입력해주세요!");
-                return;
-            }
-
-            const newQuote = {
-                text: qInput.value.trim(),
-                author: aInput.value.trim() || "익명"
-            };
-
+            const newQuote = { text: qInput.value.trim(), author: aInput.value.trim() || "익명" };
             allQuotes.unshift(newQuote);
             localStorage.setItem('allQuotes', JSON.stringify(allQuotes));
 
-            // 등록한 명언을 메인 화면에 띄우기
             currentQuote = newQuote;
             document.getElementById('quote').innerText = newQuote.text;
             document.getElementById('author').innerText = `- ${newQuote.author}`;
             checkHeartStatus();
 
-            qInput.value = "";
-            aInput.value = "";
+            qInput.value = ""; aInput.value = "";
             closeModal('addModal');
-            alert("명언이 새로 등록되었습니다!");
         }
 
-        // 메인 화면 하트 토글 (즐겨찾기 추가/해제)
         function toggleFavorite() {
             if(!currentQuote) return;
-
             const index = favoriteQuotes.findIndex(q => q.text === currentQuote.text);
-            
-            if(index > -1) {
-                // 이미 있으면 제거
-                favoriteQuotes.splice(index, 1);
-            } else {
-                // 없으면 추가
-                favoriteQuotes.push(currentQuote);
-            }
-            
+            if(index > -1) { favoriteQuotes.splice(index, 1); } 
+            else { favoriteQuotes.push(currentQuote); }
             localStorage.setItem('favoriteQuotes', JSON.stringify(favoriteQuotes));
             checkHeartStatus();
         }
 
-        // 현재 명언이 즐겨찾기 상태인지 판단해서 하트 변경
         function checkHeartStatus() {
             if(!currentQuote) return;
             const isFav = favoriteQuotes.some(q => q.text === currentQuote.text);
             document.getElementById('heartBtn').innerText = isFav ? "❤️" : "🤍";
         }
 
-        // 즐겨찾기 팝업 내부에 리스트 그리기
         function renderFavorites() {
             const favListDiv = document.getElementById('favList');
             favListDiv.innerHTML = "";
 
             if(favoriteQuotes.length === 0) {
-                favListDiv.innerHTML = "<div style='color:#999; text-align:center; padding:20px;'>즐겨찾기한 명언이 없습니다. 하트를 눌러보세요!</div>";
+                favListDiv.innerHTML = "<div style='color:#999; text-align:center; padding:20px;'>보관함이 비어있습니다.</div>";
                 return;
             }
 
@@ -300,14 +248,13 @@
                 const item = document.createElement('div');
                 item.className = 'fav-item';
                 item.innerHTML = `
-                    <span class="fav-item-text">"${q.text}" <strong>-${q.author}</strong></span>
-                    <button class="remove-fav-btn" onclick="removeFavorite(${index})">×</button>
+                    <span style="max-width:85%; word-break:keep-all;">"${q.text}" <strong>-${q.author}</strong></span>
+                    <button class="remove-fav-btn" onclick="removeFavorite(${index}); event.stopPropagation();">×</button>
                 `;
                 favListDiv.appendChild(item);
             });
         }
 
-        // 즐겨찾기 목록창에서 바로 삭제
         function removeFavorite(index) {
             favoriteQuotes.splice(index, 1);
             localStorage.setItem('favoriteQuotes', JSON.stringify(favoriteQuotes));
@@ -315,31 +262,21 @@
             checkHeartStatus();
         }
 
-        // 다른 명언 보기 (랜덤)
         function nextEverything() {
             if (allQuotes.length === 0) {
                 document.getElementById('quote').innerText = "등록된 명언이 없습니다.";
                 document.getElementById('author').innerText = "";
-                currentQuote = null;
-                return;
+                currentQuote = null; return;
             }
             const randomIndex = Math.floor(Math.random() * allQuotes.length);
             currentQuote = allQuotes[randomIndex];
-
             document.getElementById('quote').innerText = currentQuote.text;
             document.getElementById('author').innerText = `- ${currentQuote.author}`;
-            
             checkHeartStatus();
-
-            const randomBgIndex = Math.floor(Math.random() * backgrounds.length);
-            document.body.style.background = backgrounds[randomBgIndex];
+            document.body.style.background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
         }
 
-        // 시작할 때
-        window.onload = function() {
-            initData();
-            nextEverything();
-        };
+        window.onload = function() { initData(); nextEverything(); };
     </script>
 </body>
 </html>
